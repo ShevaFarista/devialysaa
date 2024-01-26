@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>WebGIS</title>
+    <link rel="stylesheet" href="library/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="library/leaflet/leaflet.js"></script>
+    <script src="library/leaflet-providers-master/leaflet-providers.js"></script>
+    <script src="library/jquery.min.js"></script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        var map = L.map('map').setView([-7.770460, 110.478494], 13);
+
+        var klas_rawan = {
+            "Aman": "#3bb50b",
+            "Cukup Aman": "#afd41c",
+            "Agak Rawan": "orange", // Warna peta untuk kategori "Agak Rawan" menjadi oranye
+            "Rawan": "orange",      // Warna peta untuk kategori "Rawan" menjadi oranye
+            "Sangat Rawan": "#d4431c"
+        };
+
+        var AreaRawanBanjir = L.geoJson(null, {
+            style: function (feature) {
+                return {
+                    color: "black",
+                    fillColor: klas_rawan[feature.properties.klas_rawan],
+                    weight: 0.3,
+                    opacity: 0,
+                    fillOpacity: 0.7
+                };
+            },
+            onEachFeature: function (feature, layer) {
+                layer.bindPopup(
+                    "Klas Rawan Banjir : " + "<left>" + feature.properties.klas_rawan + "</left>" + "<br>" +
+                    "Luas :" + "<left>" + feature.properties.luas + "</left>" + " m2"
+                );
+            }
+        });
+
+        $.getJSON("data/Kerawanan_Banjir_geo2.json", function (data) {
+            AreaRawanBanjir.addData(data);
+        });
+
+        var baseLayers = {
+            'Esri WorldTopoMap': L.tileLayer.provider('Esri.WorldTopoMap'),
+            'Esri WorldImagery': L.tileLayer.provider('Esri.WorldImagery').addTo(map),
+            'OSM Default': L.tileLayer.provider('OpenStreetMap.DE'),
+            'OSM France': L.tileLayer.provider('OpenStreetMap.France')
+        };
+
+        var mapLayers = {
+            'Area Rawan Banjir': AreaRawanBanjir
+        };
+
+        L.control.layers(baseLayers, mapLayers).addTo(map);
+    </script>
+</body>
+
+</html>
